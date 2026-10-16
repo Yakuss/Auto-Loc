@@ -1,0 +1,266 @@
+### 🚗 VEHICULE ENDPOINTS ###
+
+### GET - Récupérer tous les véhicules
+GET http://localhost:8080/api/vehicules
+
+### GET - Récupérer un véhicule par ID
+GET http://localhost:8080/api/vehicules/1
+
+### POST - Créer un véhicule
+POST http://localhost:8080/api/vehicules
+Content-Type: application/json
+
+{
+  "immatriculation": "TUN-1234",
+  "marque": "Toyota",
+  "modele": "Corolla",
+  "categorie": "BERLINE",
+  "tarifJournalier": 150.00,
+  "statut": "DISPONIBLE"
+}
+
+### PUT - Mettre à jour un véhicule
+PUT http://localhost:8080/api/vehicules/1
+Content-Type: application/json
+
+{
+  "tarifJournalier": 180.00,
+  "statut": "LOUE"
+}
+
+### DELETE - Supprimer un véhicule
+DELETE http://localhost:8080/api/vehicules/1
+
+###############################################
+
+### 👤 CLIENT ENDPOINTS ###
+
+### GET - Récupérer tous les clients
+GET http://localhost:8080/api/clients
+
+### GET - Récupérer un client par ID
+GET http://localhost:8080/api/clients/1
+
+### POST - Créer un client
+POST http://localhost:8080/api/clients
+Content-Type: application/json
+
+{
+  "nom": "Ben Ali",
+  "prenom": "Mohamed",
+  "email": "mohamed.benali@example.com",
+  "telephone": "21612345678",
+  "numPermis": "TN123456",
+  "dateInscription": "2024-01-15"
+}
+
+### PUT - Mettre à jour un client
+PUT http://localhost:8080/api/clients/1
+Content-Type: application/json
+
+{
+  "email": "nouveau.email@example.com",
+  "telephone": "21698765432"
+}
+
+### DELETE - Supprimer un client
+DELETE http://localhost:8080/api/clients/1
+
+###############################################
+
+### 📅 RESERVATION ENDPOINTS ###
+
+### GET - Récupérer toutes les réservations
+GET http://localhost:8080/api/reservations
+
+### GET - Récupérer une réservation par ID
+GET http://localhost:8080/api/reservations/1
+
+### POST - Créer une réservation
+POST http://localhost:8080/api/reservations
+Content-Type: application/json
+
+{
+  "dateDebut": "2024-02-01",
+  "dateFin": "2024-02-05",
+  "statut": "EN_ATTENTE"
+}
+
+### PUT - Mettre à jour une réservation
+PUT http://localhost:8080/api/reservations/1
+Content-Type: application/json
+
+{
+  "statut": "CONFIRMEE"
+}
+
+### DELETE - Supprimer une réservation
+DELETE http://localhost:8080/api/reservations/1
+
+###############################################
+
+### 📄 CONTRAT ENDPOINTS ###
+
+### GET - Récupérer tous les contrats
+GET http://localhost:8080/api/contrats
+
+### GET - Récupérer un contrat par ID
+GET http://localhost:8080/api/contrats/1
+
+### POST - Créer un contrat
+POST http://localhost:8080/api/contrats
+Content-Type: application/json
+
+{
+  "dateSignature": "2024-01-30",
+  "montantTotal": 750.00,
+  "valide": true
+}
+
+### PUT - Mettre à jour un contrat
+PUT http://localhost:8080/api/contrats/1
+Content-Type: application/json
+
+{
+  "montantTotal": 800.00,
+  "valide": false
+}
+
+### DELETE - Supprimer un contrat
+DELETE http://localhost:8080/api/contrats/1
+
+###############################################
+
+### 💳 PAIEMENT ENDPOINTS (READ ONLY) ###
+
+### GET - Récupérer tous les paiements
+GET http://localhost:8080/api/paiements
+
+### GET - Récupérer un paiement par ID
+GET http://localhost:8080/api/paiements/1
+
+###############################################
+
+### 🔧 MAINTENANCE ENDPOINTS ###
+
+### GET - Récupérer toutes les maintenances
+GET http://localhost:8080/api/maintenances
+
+### GET - Récupérer une maintenance par ID
+GET http://localhost:8080/api/maintenances/1
+
+### POST - Créer une maintenance
+POST http://localhost:8080/api/maintenances
+Content-Type: application/json
+
+{
+  "dateDebut": "2024-02-10",
+  "dateFin": "2024-02-12",
+  "description": "Révision complète et changement d'huile"
+}
+
+### PUT - Mettre à jour une maintenance
+PUT http://localhost:8080/api/maintenances/1
+Content-Type: application/json
+
+{
+  "dateFin": "2024-02-13",
+  "description": "Révision complète, changement d'huile et freins"
+}
+
+### DELETE - Supprimer une maintenance
+DELETE http://localhost:8080/api/maintenances/1
+
+###############################################
+
+### 🏢 AGENCE ENDPOINTS ###
+
+### GET - Récupérer toutes les agences
+GET http://localhost:8080/api/agences
+
+### GET - Récupérer une agence par ID
+GET http://localhost:8080/api/agences/1
+
+### POST - Créer une agence
+POST http://localhost:8080/api/agences
+Content-Type: application/json
+
+{
+  "nom": "Auto-Loc Tunis",
+  "ville": "Tunis",
+  "adresse": "Avenue Habib Bourguiba",
+  "telephone": "21671234567"
+}
+
+### PUT - Mettre à jour une agence
+PUT http://localhost:8080/api/agences/1
+Content-Type: application/json
+
+{
+  "ville": "Sfax",
+  "adresse": "Avenue de la Liberté",
+  "telephone": "21674123456"
+}
+
+### DELETE - Supprimer une agence
+DELETE http://localhost:8080/api/agences/1
+
+###############################################
+
+### 👔 EMPLOYE ENDPOINTS ###
+
+### GET - Récupérer tous les employés
+GET http://localhost:8080/api/employes
+
+### GET - Récupérer un employé par ID
+GET http://localhost:8080/api/employes/1
+
+### POST - Créer un employé
+POST http://localhost:8080/api/employes
+Content-Type: application/json
+
+{
+  "nom": "Trabelsi",
+  "prenom": "Ahmed",
+  "role": "GERANT"
+}
+
+### PUT - Mettre à jour un employé
+PUT http://localhost:8080/api/employes/1
+Content-Type: application/json
+
+{
+  "role": "COMMERCIAL"
+}
+
+### DELETE - Supprimer un employé
+DELETE http://localhost:8080/api/employes/1
+
+###############################################
+
+### 🛠️ EQUIPEMENT ENDPOINTS ###
+
+### GET - Récupérer tous les équipements
+GET http://localhost:8080/api/equipements
+
+### GET - Récupérer un équipement par ID
+GET http://localhost:8080/api/equipements/1
+
+### POST - Créer un équipement
+POST http://localhost:8080/api/equipements
+Content-Type: application/json
+
+{
+  "libelle": "GPS"
+}
+
+### PUT - Mettre à jour un équipement
+PUT http://localhost:8080/api/equipements/1
+Content-Type: application/json
+
+{
+  "libelle": "GPS Garmin"
+}
+
+### DELETE - Supprimer un équipement
+DELETE http://localhost:8080/api/equipements/1
