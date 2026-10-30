@@ -483,7 +483,26 @@ GET /api/vehicules/999
 
 ---
 
-## 🚀 Démarrage rapide avec curl (Windows CMD)
+## 🚀 Démarrage de l'application
+
+### Avec Maven Wrapper
+```cmd
+mvnw.cmd spring-boot:run
+```
+
+### Accès Swagger UI
+```
+http://localhost:8080/api/swagger-ui.html
+```
+
+### Accès OpenAPI JSON
+```
+http://localhost:8080/api/v3/api-docs
+```
+
+---
+
+## 🧪 Démarrage rapide avec curl (Windows CMD)
 
 ### Test GET simple
 ```cmd

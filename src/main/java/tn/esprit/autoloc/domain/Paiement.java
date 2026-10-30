@@ -1,5 +1,6 @@
 package tn.esprit.autoloc.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ public class Paiement {
 
     // Many Paiement --- 1 Contrat (côté propriétaire)
     @ManyToOne
+    @JsonBackReference("contrat-paiements")
     private Contrat contrat;
 }
  
