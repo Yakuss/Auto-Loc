@@ -5,14 +5,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.dto.VehiculeRequestDTO;
+import tn.esprit.autoloc.dto.VehiculeResponseDTO;
+import tn.esprit.autoloc.dto.mapper.VehiculeMapper;
 import tn.esprit.autoloc.service.IVehiculeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/vehicules")
@@ -21,6 +26,7 @@ import java.util.List;
 public class VehiculeController {
 
     private final IVehiculeService vehiculeService;
+    private final VehiculeMapper vehiculeMapper;
 
     @PostMapping
     @Operation(summary = "Créer un véhicule")
@@ -28,9 +34,11 @@ public class VehiculeController {
             @ApiResponse(responseCode = "201", description = "Véhicule créé avec succès"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Vehicule> createVehicule(@RequestBody Vehicule vehicule) {
+    public ResponseEntity<VehiculeResponseDTO> createVehicule(@Valid @RequestBody VehiculeRequestDTO requestDTO) {
+        Vehicule vehicule = vehiculeMapper.toEntity(requestDTO);
         Vehicule created = vehiculeService.create(vehicule);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        VehiculeResponseDTO responseDTO = vehiculeMapper.toResponseDTO(created);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -39,10 +47,11 @@ public class VehiculeController {
             @ApiResponse(responseCode = "200", description = "Véhicule trouvé"),
             @ApiResponse(responseCode = "404", description = "Véhicule introuvable")
     })
-    public ResponseEntity<Vehicule> getVehiculeById(
+    public ResponseEntity<VehiculeResponseDTO> getVehiculeById(
             @Parameter(description = "Identifiant du véhicule") @PathVariable Long id) {
         Vehicule vehicule = vehiculeService.findById(id);
-        return ResponseEntity.ok(vehicule);
+        VehiculeResponseDTO responseDTO = vehiculeMapper.toResponseDTO(vehicule);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -50,9 +59,12 @@ public class VehiculeController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des véhicules récupérée avec succès")
     })
-    public ResponseEntity<List<Vehicule>> getAllVehicules() {
+    public ResponseEntity<List<VehiculeResponseDTO>> getAllVehicules() {
         List<Vehicule> vehicules = vehiculeService.findAll();
-        return ResponseEntity.ok(vehicules);
+        List<VehiculeResponseDTO> responseDTOs = vehicules.stream()
+                .map(vehiculeMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @PutMapping("/{id}")
@@ -62,11 +74,12 @@ public class VehiculeController {
             @ApiResponse(responseCode = "404", description = "Véhicule introuvable"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Vehicule> updateVehicule(
+    public ResponseEntity<VehiculeResponseDTO> updateVehicule(
             @Parameter(description = "Identifiant du véhicule") @PathVariable Long id,
-            @RequestBody Vehicule vehicule) {
-        Vehicule updated = vehiculeService.update(id, vehicule);
-        return ResponseEntity.ok(updated);
+            @Valid @RequestBody VehiculeRequestDTO requestDTO) {
+        Vehicule updated = vehiculeService.update(id, vehiculeMapper.toEntity(requestDTO));
+        VehiculeResponseDTO responseDTO = vehiculeMapper.toResponseDTO(updated);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")

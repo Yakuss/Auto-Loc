@@ -5,14 +5,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Reservation;
+import tn.esprit.autoloc.dto.ReservationRequestDTO;
+import tn.esprit.autoloc.dto.ReservationResponseDTO;
+import tn.esprit.autoloc.dto.mapper.ReservationMapper;
 import tn.esprit.autoloc.service.IReservationService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/reservations")
@@ -21,6 +26,7 @@ import java.util.List;
 public class ReservationController {
 
     private final IReservationService reservationService;
+    private final ReservationMapper reservationMapper;
 
     @PostMapping
     @Operation(summary = "Créer une réservation")
@@ -28,9 +34,11 @@ public class ReservationController {
             @ApiResponse(responseCode = "201", description = "Réservation créée avec succès"),
             @ApiResponse(responseCode = "400", description = "Données invalides (dates incohérentes, client/véhicule manquant)")
     })
-    public ResponseEntity<Reservation> createReservation(@RequestBody Reservation reservation) {
+    public ResponseEntity<ReservationResponseDTO> createReservation(@Valid @RequestBody ReservationRequestDTO requestDTO) {
+        Reservation reservation = reservationMapper.toEntity(requestDTO);
         Reservation created = reservationService.create(reservation);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        ReservationResponseDTO responseDTO = reservationMapper.toResponseDTO(created);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -39,10 +47,11 @@ public class ReservationController {
             @ApiResponse(responseCode = "200", description = "Réservation trouvée"),
             @ApiResponse(responseCode = "404", description = "Réservation introuvable")
     })
-    public ResponseEntity<Reservation> getReservationById(
+    public ResponseEntity<ReservationResponseDTO> getReservationById(
             @Parameter(description = "Identifiant de la réservation") @PathVariable Long id) {
         Reservation reservation = reservationService.findById(id);
-        return ResponseEntity.ok(reservation);
+        ReservationResponseDTO responseDTO = reservationMapper.toResponseDTO(reservation);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -50,9 +59,12 @@ public class ReservationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des réservations récupérée avec succès")
     })
-    public ResponseEntity<List<Reservation>> getAllReservations() {
+    public ResponseEntity<List<ReservationResponseDTO>> getAllReservations() {
         List<Reservation> reservations = reservationService.findAll();
-        return ResponseEntity.ok(reservations);
+        List<ReservationResponseDTO> responseDTOs = reservations.stream()
+                .map(reservationMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @PutMapping("/{id}")
@@ -62,11 +74,12 @@ public class ReservationController {
             @ApiResponse(responseCode = "404", description = "Réservation introuvable"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Reservation> updateReservation(
+    public ResponseEntity<ReservationResponseDTO> updateReservation(
             @Parameter(description = "Identifiant de la réservation") @PathVariable Long id,
-            @RequestBody Reservation reservation) {
-        Reservation updated = reservationService.update(id, reservation);
-        return ResponseEntity.ok(updated);
+            @Valid @RequestBody ReservationRequestDTO requestDTO) {
+        Reservation updated = reservationService.update(id, reservationMapper.toEntity(requestDTO));
+        ReservationResponseDTO responseDTO = reservationMapper.toResponseDTO(updated);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")

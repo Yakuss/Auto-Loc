@@ -5,14 +5,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Equipement;
+import tn.esprit.autoloc.dto.EquipementRequestDTO;
+import tn.esprit.autoloc.dto.EquipementResponseDTO;
+import tn.esprit.autoloc.dto.mapper.EquipementMapper;
 import tn.esprit.autoloc.service.IEquipementService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/equipements")
@@ -21,6 +26,7 @@ import java.util.List;
 public class EquipementController {
 
     private final IEquipementService equipementService;
+    private final EquipementMapper equipementMapper;
 
     @PostMapping
     @Operation(summary = "Créer un équipement")
@@ -28,9 +34,11 @@ public class EquipementController {
             @ApiResponse(responseCode = "201", description = "Équipement créé avec succès"),
             @ApiResponse(responseCode = "400", description = "Données invalides (libellé vide)")
     })
-    public ResponseEntity<Equipement> createEquipement(@RequestBody Equipement equipement) {
+    public ResponseEntity<EquipementResponseDTO> createEquipement(@Valid @RequestBody EquipementRequestDTO requestDTO) {
+        Equipement equipement = equipementMapper.toEntity(requestDTO);
         Equipement created = equipementService.create(equipement);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        EquipementResponseDTO responseDTO = equipementMapper.toResponseDTO(created);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -39,10 +47,11 @@ public class EquipementController {
             @ApiResponse(responseCode = "200", description = "Équipement trouvé"),
             @ApiResponse(responseCode = "404", description = "Équipement introuvable")
     })
-    public ResponseEntity<Equipement> getEquipementById(
+    public ResponseEntity<EquipementResponseDTO> getEquipementById(
             @Parameter(description = "Identifiant de l'équipement") @PathVariable Long id) {
         Equipement equipement = equipementService.findById(id);
-        return ResponseEntity.ok(equipement);
+        EquipementResponseDTO responseDTO = equipementMapper.toResponseDTO(equipement);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -50,9 +59,12 @@ public class EquipementController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des équipements récupérée avec succès")
     })
-    public ResponseEntity<List<Equipement>> getAllEquipements() {
+    public ResponseEntity<List<EquipementResponseDTO>> getAllEquipements() {
         List<Equipement> equipements = equipementService.findAll();
-        return ResponseEntity.ok(equipements);
+        List<EquipementResponseDTO> responseDTOs = equipements.stream()
+                .map(equipementMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @PutMapping("/{id}")
@@ -62,11 +74,12 @@ public class EquipementController {
             @ApiResponse(responseCode = "404", description = "Équipement introuvable"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Equipement> updateEquipement(
+    public ResponseEntity<EquipementResponseDTO> updateEquipement(
             @Parameter(description = "Identifiant de l'équipement") @PathVariable Long id,
-            @RequestBody Equipement equipement) {
-        Equipement updated = equipementService.update(id, equipement);
-        return ResponseEntity.ok(updated);
+            @Valid @RequestBody EquipementRequestDTO requestDTO) {
+        Equipement updated = equipementService.update(id, equipementMapper.toEntity(requestDTO));
+        EquipementResponseDTO responseDTO = equipementMapper.toResponseDTO(updated);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")

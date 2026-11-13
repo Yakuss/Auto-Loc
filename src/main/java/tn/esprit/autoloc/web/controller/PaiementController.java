@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Paiement;
+import tn.esprit.autoloc.dto.PaiementResponseDTO;
+import tn.esprit.autoloc.dto.mapper.PaiementMapper;
 import tn.esprit.autoloc.service.IPaiementService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/paiements")
@@ -20,6 +23,7 @@ import java.util.List;
 public class PaiementController {
 
     private final IPaiementService paiementService;
+    private final PaiementMapper paiementMapper;
 
     // Lecture seule: aucune création, modification, ni suppression
     // Les paiements sont gérés via les contrats (cascade)
@@ -30,10 +34,11 @@ public class PaiementController {
             @ApiResponse(responseCode = "200", description = "Paiement trouvé"),
             @ApiResponse(responseCode = "404", description = "Paiement introuvable")
     })
-    public ResponseEntity<Paiement> getPaiementById(
+    public ResponseEntity<PaiementResponseDTO> getPaiementById(
             @Parameter(description = "Identifiant du paiement") @PathVariable Long id) {
         Paiement paiement = paiementService.findById(id);
-        return ResponseEntity.ok(paiement);
+        PaiementResponseDTO responseDTO = paiementMapper.toResponseDTO(paiement);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -41,8 +46,11 @@ public class PaiementController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des paiements récupérée avec succès")
     })
-    public ResponseEntity<List<Paiement>> getAllPaiements() {
+    public ResponseEntity<List<PaiementResponseDTO>> getAllPaiements() {
         List<Paiement> paiements = paiementService.findAll();
-        return ResponseEntity.ok(paiements);
+        List<PaiementResponseDTO> responseDTOs = paiements.stream()
+                .map(paiementMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 }

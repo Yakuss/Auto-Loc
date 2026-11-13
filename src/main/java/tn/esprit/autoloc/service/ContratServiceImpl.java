@@ -60,8 +60,8 @@ public class ContratServiceImpl implements IContratService {
         if (contrat.getDateSignature() != null) {
             existant.setDateSignature(contrat.getDateSignature());
         }
-        // valide est un boolean primitif, on peut toujours le mettre à jour
-        existant.setValide(contrat.isValide());
+        // Mise à jour du champ valide
+        existant.setValide(contrat.getValide());
         
         return contratRepository.save(existant);
     }

@@ -5,14 +5,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Client;
+import tn.esprit.autoloc.dto.ClientRequestDTO;
+import tn.esprit.autoloc.dto.ClientResponseDTO;
+import tn.esprit.autoloc.dto.mapper.ClientMapper;
 import tn.esprit.autoloc.service.IClientService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/clients")
@@ -21,6 +26,7 @@ import java.util.List;
 public class ClientController {
 
     private final IClientService clientService;
+    private final ClientMapper clientMapper;
 
     @PostMapping
     @Operation(summary = "Créer un client")
@@ -28,9 +34,11 @@ public class ClientController {
             @ApiResponse(responseCode = "201", description = "Client créé avec succès"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Client> createClient(@RequestBody Client client) {
+    public ResponseEntity<ClientResponseDTO> createClient(@Valid @RequestBody ClientRequestDTO requestDTO) {
+        Client client = clientMapper.toEntity(requestDTO);
         Client created = clientService.create(client);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        ClientResponseDTO responseDTO = clientMapper.toResponseDTO(created);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -39,10 +47,11 @@ public class ClientController {
             @ApiResponse(responseCode = "200", description = "Client trouvé"),
             @ApiResponse(responseCode = "404", description = "Client introuvable")
     })
-    public ResponseEntity<Client> getClientById(
+    public ResponseEntity<ClientResponseDTO> getClientById(
             @Parameter(description = "Identifiant du client") @PathVariable Long id) {
         Client client = clientService.findById(id);
-        return ResponseEntity.ok(client);
+        ClientResponseDTO responseDTO = clientMapper.toResponseDTO(client);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -50,9 +59,12 @@ public class ClientController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des clients récupérée avec succès")
     })
-    public ResponseEntity<List<Client>> getAllClients() {
+    public ResponseEntity<List<ClientResponseDTO>> getAllClients() {
         List<Client> clients = clientService.findAll();
-        return ResponseEntity.ok(clients);
+        List<ClientResponseDTO> responseDTOs = clients.stream()
+                .map(clientMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @PutMapping("/{id}")
@@ -62,11 +74,12 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Client introuvable"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Client> updateClient(
+    public ResponseEntity<ClientResponseDTO> updateClient(
             @Parameter(description = "Identifiant du client") @PathVariable Long id,
-            @RequestBody Client client) {
-        Client updated = clientService.update(id, client);
-        return ResponseEntity.ok(updated);
+            @Valid @RequestBody ClientRequestDTO requestDTO) {
+        Client updated = clientService.update(id, clientMapper.toEntity(requestDTO));
+        ClientResponseDTO responseDTO = clientMapper.toResponseDTO(updated);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")

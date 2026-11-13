@@ -5,14 +5,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.autoloc.domain.Employe;
+import tn.esprit.autoloc.dto.EmployeRequestDTO;
+import tn.esprit.autoloc.dto.EmployeResponseDTO;
+import tn.esprit.autoloc.dto.mapper.EmployeMapper;
 import tn.esprit.autoloc.service.IEmployeService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/employes")
@@ -21,6 +26,7 @@ import java.util.List;
 public class EmployeController {
 
     private final IEmployeService employeService;
+    private final EmployeMapper employeMapper;
 
     @PostMapping
     @Operation(summary = "Créer un employé")
@@ -28,9 +34,11 @@ public class EmployeController {
             @ApiResponse(responseCode = "201", description = "Employé créé avec succès"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Employe> createEmploye(@RequestBody Employe employe) {
+    public ResponseEntity<EmployeResponseDTO> createEmploye(@Valid @RequestBody EmployeRequestDTO requestDTO) {
+        Employe employe = employeMapper.toEntity(requestDTO);
         Employe created = employeService.create(employe);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+        EmployeResponseDTO responseDTO = employeMapper.toResponseDTO(created);
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -39,10 +47,11 @@ public class EmployeController {
             @ApiResponse(responseCode = "200", description = "Employé trouvé"),
             @ApiResponse(responseCode = "404", description = "Employé introuvable")
     })
-    public ResponseEntity<Employe> getEmployeById(
+    public ResponseEntity<EmployeResponseDTO> getEmployeById(
             @Parameter(description = "Identifiant de l'employé") @PathVariable Long id) {
         Employe employe = employeService.findById(id);
-        return ResponseEntity.ok(employe);
+        EmployeResponseDTO responseDTO = employeMapper.toResponseDTO(employe);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
@@ -50,9 +59,12 @@ public class EmployeController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Liste des employés récupérée avec succès")
     })
-    public ResponseEntity<List<Employe>> getAllEmployes() {
+    public ResponseEntity<List<EmployeResponseDTO>> getAllEmployes() {
         List<Employe> employes = employeService.findAll();
-        return ResponseEntity.ok(employes);
+        List<EmployeResponseDTO> responseDTOs = employes.stream()
+                .map(employeMapper::toResponseDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responseDTOs);
     }
 
     @PutMapping("/{id}")
@@ -62,11 +74,12 @@ public class EmployeController {
             @ApiResponse(responseCode = "404", description = "Employé introuvable"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<Employe> updateEmploye(
+    public ResponseEntity<EmployeResponseDTO> updateEmploye(
             @Parameter(description = "Identifiant de l'employé") @PathVariable Long id,
-            @RequestBody Employe employe) {
-        Employe updated = employeService.update(id, employe);
-        return ResponseEntity.ok(updated);
+            @Valid @RequestBody EmployeRequestDTO requestDTO) {
+        Employe updated = employeService.update(id, employeMapper.toEntity(requestDTO));
+        EmployeResponseDTO responseDTO = employeMapper.toResponseDTO(updated);
+        return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{id}")
